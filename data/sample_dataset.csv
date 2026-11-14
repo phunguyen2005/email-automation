@@ -1,0 +1,6 @@
+name,email,score,group
+Nguyễn Văn An,an@example.com,95,A
+Trần Minh Anh,anh@example.com,88,B
+Lê Hoàng Nam,nam@example.com,91,A
+Email lỗi,not-an-email,70,B
+Trùng địa chỉ,an@example.com,80,A
