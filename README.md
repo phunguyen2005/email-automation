@@ -13,7 +13,7 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-Sửa `.env`: điền `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`. Với Gmail, bật xác minh hai bước và tạo **App Password** trong tài khoản Google; nhập App Password vào `SMTP_PASSWORD`. Không dùng mật khẩu đăng nhập thông thường. Có thể đổi `SMTP_HOST`, `SMTP_PORT` và `SMTP_SECURITY` (`starttls` hoặc `ssl`) cho nhà cung cấp khác.
+Sửa `.env`: điền `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`. Với Gmail, bật xác minh hai bước và tạo **App Password** theo [hướng dẫn chính thức của Google](https://support.google.com/mail/answer/185833); nhập App Password vào `SMTP_PASSWORD`. Tùy loại tài khoản, tùy chọn App Password có thể không xuất hiện. Không dùng mật khẩu đăng nhập thông thường. Có thể đổi `SMTP_HOST`, `SMTP_PORT` và `SMTP_SECURITY` (`starttls` hoặc `ssl`) cho nhà cung cấp khác.
 
 ```powershell
 streamlit run app.py

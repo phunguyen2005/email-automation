@@ -8,9 +8,9 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-from services.data_service import email_column, read_dataset, validate
+from services.data_service import EMAIL_RE, email_column, read_dataset, validate
 from services.database_service import connect, history
-from services.email_service import MAX_ATTACHMENT, SMTPConfig, send_batch
+from services.email_service import MAX_ATTACHMENT, MAX_MESSAGE, SMTPConfig, send_batch
 from services.template_service import render_template
 
 ROOT = Path(__file__).parent
@@ -138,6 +138,10 @@ st.caption(f"📄 {uploaded.name} · {len(frame)} bản ghi · Cột email: {ema
 total = len(validated)
 valid_count = sum(validated["Trạng thái dữ liệu"] == "Hợp lệ")
 previous = history(DB_PATH, st.session_state.campaign, st.session_state.mode)
+send_status = {item[0].casefold(): item[4] for item in previous}
+validated["Trạng thái gửi"] = [
+    send_status.get(str(email).casefold(), "Chưa gửi") for email in validated[email_col]
+]
 metrics = st.columns(5)
 for cell, label, value in zip(metrics,
     ["Tổng dữ liệu", "Hợp lệ", "Không hợp lệ", "Đã gửi", "Thất bại"],
@@ -186,8 +190,12 @@ if attachments:
     for name, content in attachments:
         if not content or len(content) > MAX_ATTACHMENT:
             st.error(f"{name} rỗng hoặc vượt 10 MB.")
+    if sum(len(content) for _, content in attachments) > MAX_MESSAGE:
+        st.error("Tổng file đính kèm vượt 20 MB.")
 if st.session_state.mode == "Test":
     test_email = st.text_input("Email nhận thử", key="test_email")
+    if test_email and not EMAIL_RE.fullmatch(test_email.strip()):
+        st.error("Email nhận thử không hợp lệ.")
 else:
     test_email = ""
     st.warning("Live Mode sẽ gửi email riêng đến những người nhận đã chọn.")
@@ -196,6 +204,8 @@ job = st.session_state.get("job")
 busy = bool(job and not job["done"])
 allowed = bool(selected and config.ready and not busy and
                (st.session_state.mode == "Test" or live_confirmed) and
+               (st.session_state.mode != "Test" or bool(EMAIL_RE.fullmatch(test_email.strip()))) and
+               sum(len(content) for _, content in attachments) <= MAX_MESSAGE and
                all(content and len(content) <= MAX_ATTACHMENT for _, content in attachments))
 with st.form("confirmation"):
     confirmation = st.checkbox("Tôi xác nhận gửi đến email thử nghiệm." if st.session_state.mode == "Test"
